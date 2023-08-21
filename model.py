@@ -277,14 +277,14 @@ class GPT(nn.Module):
     for k in sd_keys_hf:
       if any(k.endswith(w) for w in transposed):
         # special treatment for the Conv1D weights we need to transpose
-        assert sd_hf[k].shape[::-1] == sd[k].shape
+        assert sd_hf[k].shape[::-1] == sd_hf[k].shape
         with torch.no_grad():
-          sd[k].copy_(sd_hf[k].t())
+          sd_hf[k].copy_(sd_hf[k].t())
       else:
         # vanilla copy over the other parameters
-        assert sd_hf[k].shape == sd[k].shape
+        assert sd_hf[k].shape == sd_hf[k].shape
         with torch.no_grad():
-          sd[k].copy_(sd_hf[k])
+          sd_hf[k].copy_(sd_hf[k])
 
     return model
 
