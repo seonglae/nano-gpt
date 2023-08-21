@@ -79,7 +79,7 @@ compile = True  # use PyTorch 2.0 to compile the model to be faster
 config_keys = [k for k, v in globals().items() if not k.startswith(
     '_') and isinstance(v, (int, float, bool, str))]
 # overrides from command line or config file
-exec(open('configurator.py').read())
+exec(open('configurator.py', encoding='utf-8').read())
 config = {k: globals()[k] for k in config_keys}  # will be useful for logging
 # -----------------------------------------------------------------------------
 
@@ -114,6 +114,7 @@ if master_process:
 torch.manual_seed(1337 + seed_offset)
 torch.backends.cuda.matmul.allow_tf32 = True  # allow tf32 on matmul
 torch.backends.cudnn.allow_tf32 = True  # allow tf32 on cudnn
+
 # for later use in torch.autocast
 device_type = 'cuda' if 'cuda' in device else 'cpu'
 # note: float16 data type will automatically use a GradScaler
@@ -210,7 +211,7 @@ if block_size < model.config.block_size:
 model.to(device)
 
 # initialize a GradScaler. If enabled=False scaler is a no-op
-scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))
+scaler = torch.cuda.amp.GradScaler(enabled=dtype == 'float16')
 
 # optimizer
 optimizer = model.configure_optimizers(
@@ -241,7 +242,7 @@ def estimate_loss():
     for k in range(eval_iters):
       X, Y = get_batch(split)
       with ctx:
-        logits, loss = model(X, Y)
+        _, loss = model(X, Y)
       losses[k] = loss.item()
     out[split] = losses.mean()
   model.train()

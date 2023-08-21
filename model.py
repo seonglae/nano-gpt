@@ -10,9 +10,10 @@ https://github.com/huggingface/transformers/blob/main/src/transformers/models/gp
 import math
 import inspect
 from dataclasses import dataclass
+from transformers import GPT2LMHeadModel
 
 import torch
-import torch.nn as nn
+from torch import nn
 from torch.nn import functional as F
 
 
@@ -24,8 +25,8 @@ class LayerNorm(nn.Module):
     self.weight = nn.Parameter(torch.ones(ndim))
     self.bias = nn.Parameter(torch.zeros(ndim)) if bias else None
 
-  def forward(self, input):
-    return F.layer_norm(input, self.weight.shape, self.weight, self.bias, 1e-5)
+  def forward(self, input_tensor):
+    return F.layer_norm(input_tensor, self.weight.shape, self.weight, self.bias, 1e-5)
 
 
 class CausalSelfAttention(nn.Module):
@@ -160,7 +161,7 @@ class GPT(nn.Module):
                               math.sqrt(2 * config.n_layer))
 
     # report number of parameters
-    print("number of parameters: %.2fM" % (self.get_num_params()/1e6,))
+    print(f"number of parameters: {self.get_num_params()/1e6:.2f}M")
 
   def get_num_params(self, non_embedding=True):
     """
@@ -184,8 +185,9 @@ class GPT(nn.Module):
 
   def forward(self, idx, targets=None):
     device = idx.device
-    b, t = idx.size()
-    assert t <= self.config.block_size, f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
+    _, t = idx.size()
+    assert t <= self.config.block_size, \
+        f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
     pos = torch.arange(0, t, dtype=torch.long, device=device)  # shape (t)
 
     # forward the GPT model itself
@@ -229,8 +231,7 @@ class GPT(nn.Module):
     override_args = override_args or {}  # default to empty dict
     # only dropout can be overridden see more notes below
     assert all(k == 'dropout' for k in override_args)
-    from transformers import GPT2LMHeadModel
-    print("loading weights from pretrained gpt: %s" % model_type)
+    print(f"loading weights from pretrained gpt: {model_type}")
 
     # n_layer, n_head and n_embd are determined from model_type
     config_args = {
