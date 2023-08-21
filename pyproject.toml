@@ -1,0 +1,38 @@
+[project]
+authors = [
+  {name = "seonglae", email = "sungle3737@gmail.com"},
+]
+dependencies = [
+  "pip>=23.2.1",
+  "torch>=2.0.1",
+  "numpy>=1.24.4",
+  "transformers>=4.31.0",
+  "datasets>=2.14.4",
+  "tiktoken>=0.4.0",
+  "wandb>=0.15.8",
+  "tqdm>=4.66.1",
+]
+description = "Add your description here"
+name = "nanogpt"
+readme = "README.md"
+requires-python = ">= 3.8"
+version = "0.1.0"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.rye]
+dev-dependencies = [
+  "autopep8>=2.0.2",
+  "mypy>=1.5.1",
+]
+managed = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[[tool.rye.sources]]
+name = "cuda"
+type = "index"
+url = "https://download.pytorch.org/whl/cu118"
